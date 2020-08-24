@@ -1,4 +1,5 @@
-# Project Title
+# Project Title: Lab 1
+### Israel Castillo Herrera IF708348
 
 ## Description
 *Insert here a brief description of the project, including, purpose, technologies used and context 
