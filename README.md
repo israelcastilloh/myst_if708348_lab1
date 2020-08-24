@@ -1,9 +1,8 @@
 # Project Title: Lab 1
-### Israel Castillo Herrera IF708348
+
 
 ## Description
-*Insert here a brief description of the project, including, purpose, technologies used and context 
-where it was created.*
+This is the Lab 1. Regarding NAFTRAC rebalancing. 
 
 ## Install dependencies
 
@@ -18,7 +17,7 @@ Or you can manually install one by one using the name and version in the file.
 *Add here examples of core functionalities for the project in this repository.*
 
 ## Author
-*Add Name and a brief description on who you are.*
+### Israel Castillo Herrera IF708348
 
 ## License
 **GNU General Public License v3.0** 
