@@ -42,14 +42,10 @@ def clean_dates(str):
     return str
 
 def order_Dates_dict(data_dict):
-    sorted_dict = sorted(data_dict.items(),
-            key = lambda x:datetime.strptime(x[0], '%d-%m-%Y'),
-                                                reverse=False)
-    sorted_dict = [(sorted_dict[i])
-         for i in range(len(sorted_dict))]
+    sorted_dict = sorted(data_dict.items(),key = lambda x:datetime.strptime(x[0], '%d-%m-%Y'), reverse=False)
+    sorted_dict = [(sorted_dict[i]) for i in range(len(sorted_dict))]
     sort_cleaned_dict={}
-    for data in sorted_dict:
-        sort_cleaned_dict[data[0]] = data[1]
+    for data in sorted_dict: sort_cleaned_dict[data[0]] = data[1]
     return sort_cleaned_dict
 
 def read_csv():
@@ -59,8 +55,7 @@ def read_csv():
         local_path = path+"/"+file
         date_dict = pd.read_csv(local_path, usecols=[1], nrows=1, header=None)
         date_dict = clean_dates(str(date_dict.iloc[0,0]))
-        data_dict[date_dict] = pd.read_csv(local_path, usecols=[0,1,3,4],
-                                skiprows=[0, 1]).replace(',','', regex=True)
+        data_dict[date_dict] = pd.read_csv(local_path, usecols=[0,1,3,4], skiprows=[0, 1]).replace(',','', regex=True)
     data_dict = order_Dates_dict(data_dict)
     return data_dict
 
