@@ -14,5 +14,5 @@ import numpy as np
 from functions import file_walker, read_csv, calculate_returns
 
 
-files_list = file_walker()
+
 calculate_returns()
