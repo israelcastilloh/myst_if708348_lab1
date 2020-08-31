@@ -10,14 +10,9 @@
 """
 import os
 import csv
-import pandas as pd
-import xlrd
-from collections import OrderedDict
 from datetime import datetime
 
-path = '/Users/israelcastillo/Documents/m_st/myst_if708348_lab1/files/NAFTRAC_holdings'
-
-def file_walker():
+def file_walker(path):
     files = []
     # r=root, d=directories, f = files
     for r, d, f in os.walk(path):
@@ -48,24 +43,13 @@ def order_Dates_dict(data_dict):
     for data in sorted_dict: sort_cleaned_dict[data[0]] = data[1]
     return sort_cleaned_dict
 
-def read_csv():
-    files = file_walker()
-    data_dict = {}
-    for file in files:
-        local_path = path+"/"+file
-        date_dict = pd.read_csv(local_path, usecols=[1], nrows=1, header=None)
-        date_dict = clean_dates(str(date_dict.iloc[0,0]))
-        data_dict[date_dict] = pd.read_csv(local_path, usecols=[0,1,3,4], skiprows=[0, 1]).replace(',','', regex=True)
-    data_dict = order_Dates_dict(data_dict)
-    return data_dict
-
-def calculate_returns():
-    data_dict = read_csv()
-    price_weight = {}
-    for file in data_dict:
-        data_df = data_dict[file]
-        price_weight[file] = data_df[["Peso (%)", "Precio"]].dropna().apply(pd.to_numeric)
-        price_weight[file]["Peso (%)"] = price_weight[file]["Peso (%)"].div(100)
-        price_weight[file]["Peso Ponderado"] = price_weight[file]["Peso (%)"] * price_weight[file]["Precio"]
-        price_weight[file] = price_weight[file].sum()
-        print(price_weight[file])
+def clean_tickers(data_dict, file):
+    data_dict[file]["Ticker"] = data_dict[file]["Ticker"].str.replace('*','')+".MX"
+    data_dict[file]["Ticker"] = data_dict[file]["Ticker"].str.replace('GFREGIOO', 'RA')
+    data_dict[file]["Ticker"] = data_dict[file]["Ticker"].str.replace('KOFL', 'MXN')
+    data_dict[file]["Ticker"] = data_dict[file]["Ticker"].str.replace('BSMXB', 'MXN')
+    data_dict[file]["Ticker"] = data_dict[file]["Ticker"].str.replace('LIVEPOLC.1.MX', 'LIVEPOLC-1.MX')
+    data_dict[file]["Ticker"] = data_dict[file]["Ticker"].str.replace('MEXCHEM.MX', 'ORBIA.MX')
+    data_dict[file]["Ticker"] = data_dict[file]["Ticker"].str.replace('MXN.MX', 'MXN CASH')
+    data_dict[file]["Ticker"] = data_dict[file]["Ticker"].str.replace('USD.MX', 'USD CASH')
+    return data_dict[file]["Ticker"]
