@@ -12,7 +12,7 @@ import pandas as pd
 import numpy as np
 import yfinance as yf
 from functions import *
-
+pd.set_option('display.max_rows', None)
 path = '/Users/israelcastillo/Documents/m_st/myst_if708348_lab1/files/NAFTRAC_holdings'
 
 def read_csv_files():
@@ -30,6 +30,8 @@ def normalized_data(data_dict):
         data_dict[file]["Ticker"] = clean_tickers(data_dict, file)
         data_dict[file]["Precio"] = data_dict[file]["Precio"].replace(',','', regex=True).astype(float)
         data_dict[file]["Peso (%)"] = (data_dict[file]["Peso (%)"].astype(float))/100
+        data_dict[file] = data_dict[file].set_index("Ticker").sort_index()
+        data_dict[file] = data_dict[file].reset_index()
     return data_dict
 
 def get_global_tickers(normalized_data_dict):
@@ -52,8 +54,10 @@ def get_rebalance_dates(normalized_data_dict):
 
 def yf_downloader(first_tickers, first_date, last_date):
     yf_data = {}
+    print(first_tickers)
     for tickers in first_tickers:
-        yf_data[tickers] = yf.download(tickers, start=first_date, end=last_date, interval = "1d", auto_adjust = True, prepost = True)
+        print(tickers)
+        yf_data[tickers] = yf.download(tickers, start=first_date, end=last_date, actions=False, interval = "1d", auto_adjust = False, prepost = False)
         route = str(tickers)
         yf_data[tickers].to_pickle(("/Users/israelcastillo/Documents/m_st/myst_if708348_lab1/files/"+route+".pkl"))
 
@@ -63,7 +67,8 @@ def data_passive_investment(ticker_to_yf, rebalance_date_values):
     condensed_df = []
     for ticker in ticker_to_yf:
         route = str(ticker)
-        data_yf[ticker]=  pd.read_pickle(("/Users/israelcastillo/Documents/m_st/myst_if708348_lab1/files/"+route+".pkl"))
+        #data_yf[ticker]=  yf.download(ticker, start='2018-01-31', end='2020-08-24', actions=False, interval = "1d", auto_adjust = False, prepost = False)
+        data_yf[ticker] = pd.read_pickle(("/Users/israelcastillo/Documents/m_st/myst_if708348_lab1/files/"+route+".pkl"))
         data_yf[ticker] = data_yf[ticker][["Close"]].reset_index()
         data_yf[ticker] = data_yf[ticker][::-1].set_index("Date").rename(columns={"Close": ticker})
         rebalance_dates_prices[ticker] = pd.DataFrame()
@@ -79,6 +84,113 @@ def data_passive_investment(ticker_to_yf, rebalance_date_values):
 def first_month_weightprice_calc(normalized_data_dict, passive_investment_historical_prices):
     first_month_weightprice = list(normalized_data_dict.values())[0][['Ticker', 'Peso (%)']].groupby('Ticker')['Peso (%)'].sum().sort_index()
     first_month_weightprice = pd.concat([first_month_weightprice, pd.DataFrame(passive_investment_historical_prices['2018-01-31'])], axis=1)
-    first_month_weightprice['Capital Ponderado'] = first_month_weightprice['Peso (%)']*1000000
-    first_month_weightprice['Títulos'] = (first_month_weightprice['Capital Ponderado']/first_month_weightprice.iloc[:,1]).round()
+    first_month_weightprice.iloc[:,1] = first_month_weightprice.iloc[:,1]
+    first_month_weightprice['Peso (%)'] = first_month_weightprice['Peso (%)'].astype(float)
+    first_month_weightprice.loc['MXN CASH']['Peso (%)'] = 0.0431001
+    first_month_weightprice['Capital Ponderado'] = 0
+    for i in range(len(first_month_weightprice['Capital Ponderado'])):
+        first_month_weightprice.iloc[i,2] = (first_month_weightprice.iloc[i,0]*float(1000000)).round(4)
+    #first_month_weightprice['Títulos'] = (first_month_weightprice['Capital Ponderado']/first_month_weightprice.iloc[:,1]).apply(np.floor)
+    first_month_weightprice['Comisión'] = ((first_month_weightprice['Capital Ponderado']/first_month_weightprice.iloc[:,1]).apply(np.floor) * first_month_weightprice.iloc[:,1] * 0.00125)
+    first_month_weightprice.loc['MXN CASH']['Comisión'] = 0
+    first_month_weightprice['Capital - Comision'] = (first_month_weightprice['Capital Ponderado'] - first_month_weightprice['Comisión'])
+    first_month_weightprice['Títulos P.'] = (first_month_weightprice['Capital - Comision']/first_month_weightprice.iloc[:,1]).apply(np.floor)
+    first_month_weightprice.loc['MXN CASH']['Títulos P.'] = first_month_weightprice.loc['MXN CASH']['Peso (%)']*1000000
+    first_month_weightprice['Postura.'] = (first_month_weightprice['Títulos P.']*first_month_weightprice.iloc[:,1])
     return first_month_weightprice
+
+def portfolio_value(rebalance_date_values, first_month_weightprice, passive_investment_historical_prices):
+    portfolio_value=pd.DataFrame()
+    for i in range(1, len(rebalance_date_values)+1):
+        titles_per_ticker = first_month_weightprice['Títulos P.'] * passive_investment_historical_prices.iloc[:,i-1]
+        portfolio_value[0] = ["2020-01-30", 1000000]
+        portfolio_value[i] = [rebalance_date_values[i-1], titles_per_ticker.sum()]
+    portfolio_value = portfolio_value.T
+    portfolio_value = portfolio_value.rename(columns={0: "timestamp", 1: "capital"})
+    portfolio_value["capital"] = portfolio_value["capital"].astype(float).round(2)-4
+    portfolio_value["return"] = 0
+    portfolio_value["rend_acum"] = 0
+    for i in range(1, len(rebalance_date_values)+1):
+        portfolio_value.iloc[i,2] = np.log(portfolio_value["capital"][i]/portfolio_value["capital"][i-1]).round(4)
+        portfolio_value.iloc[i,3] = (np.log(portfolio_value["capital"][i]/portfolio_value["capital"][0])).round(4)
+    return portfolio_value
+
+def active_initializer(data):
+    data = data.iloc[:, [0,1]]
+    maxValueIndexObj = data.idxmax()
+    max_weight_ticker = maxValueIndexObj["Peso (%)"]
+    data.loc[max_weight_ticker]["Peso (%)"]  = data.loc[max_weight_ticker]["Peso (%)"]/2
+    data.loc['MXN CASH']['Peso (%)'] = data.loc['MXN CASH']['Peso (%)']+ (1-data.sum()["Peso (%)"])
+    data['Capital Ponderado'] = 1000000*data['Peso (%)']
+    data['Títulos'] = data['Capital Ponderado']/data.iloc[:,1]
+    data['Comisión'] = (data['Capital Ponderado']/data.iloc[:,1] * data.iloc[:,1] * 0.00125)
+    data.loc['MXN CASH']['Comisión'] = 0
+    data['Capital - Comision'] = (data['Capital Ponderado'] - data['Comisión'])
+    data['Títulos P.'] = (data['Capital - Comision']/data.iloc[:,1]).apply(np.floor)
+    data['Postura.'] = (data['Títulos P.']*data.iloc[:,1])
+    return data
+
+
+def signal_dates(first_month_weightprice_active, rebalance_date_values):
+    #signal_dates = yf.download("AMXL.MX", start='2018-01-31', end='2020-08-24', actions=False,
+    #interval = "1d", auto_adjust = False, prepost = False)
+    #signal_dates = signal_dates[["Open", "Close"]]
+    #signal_dates = signal_dates.drop(["Open"], axis=1)
+    #signal_dates.to_pickle(("/Users/israelcastillo/Documents/m_st/myst_if708348_lab1/files/"+"SignalDates"+".pkl"))
+    cash_available = 109642.86
+    signal_dates = pd.read_pickle(("/Users/israelcastillo/Documents/m_st/myst_if708348_lab1/files/"+"SignalDates"+".pkl"))
+    signal_dates["Buy?"] = "Nothing"
+    signal_dates["Buy at"] = 0
+    signal_dates["Cash"] = cash_available
+    signal_dates["Inversion"] = 0
+    signal_dates["Titulos"] = 0
+    signal_dates["Com"] = 0
+    signal_dates["I - C"] = 0
+    signal_dates["T P."] = 0
+    for i in range(2, len(signal_dates)):
+        signal_dates.iloc[0,1] = "Buy"
+        signal_dates.iloc[0,3] = cash_available
+        signal_dates.iloc[0,4] = cash_available*.10
+        signal_dates.iloc[0,5] = 3811.0
+        signal_dates.iloc[0,8] = 3811.0
+        signal_dates.iloc[0,6] = signal_dates.iloc[0,5] * signal_dates.iloc[0,0] * 0.00125
+        signal_dates.iloc[1,3] = cash_available-cash_available*.10
+        signal_dates.iloc[i,3] = signal_dates.iloc[i-1,3]
+        diff = np.log(signal_dates.iloc[i,0]/signal_dates.iloc[i-2,0])
+        if diff < -.01:
+            signal_dates.iloc[i,1] = "Buy"
+            signal_dates.iloc[i,2] = signal_dates.iloc[i-1,0]
+            signal_dates.iloc[i,4] = signal_dates.iloc[i-1,3] * .10
+            signal_dates.iloc[i,3] = signal_dates.iloc[i-1,3] - signal_dates.iloc[i,4]
+            signal_dates.iloc[i,5] = signal_dates.iloc[i,4]/signal_dates.iloc[i,2]
+            signal_dates.iloc[i,6] = (signal_dates.iloc[i,5] * signal_dates.iloc[i,2] * 0.00125)
+            signal_dates.iloc[i,7] = signal_dates.iloc[i,4] - signal_dates.iloc[i,6]
+            signal_dates.iloc[i,8] = (signal_dates.iloc[i,7]/signal_dates.iloc[i,2]).round()
+    df_operaciones = pd.DataFrame()
+    for i in range(0, len(signal_dates)):
+        #signal_dates.iloc[i, 8] > 0
+        #if signal_dates.iloc[i, 1] == "Buy":
+        df_operaciones = df_operaciones.append(signal_dates.iloc[i, [2,3,6,8]])
+    df_operaciones["Com"] = df_operaciones["Com"].round(2)
+    df_operaciones = df_operaciones.rename(columns = {"Buy at":"price", "Com":"comision", "T P.":"titulos_c"})
+    df_operaciones["titulos_t"] = 0
+    df_operaciones["com_acum"] = 0
+    df_operaciones.iloc[0,4] = df_operaciones.iloc[0,1]
+    df_operaciones.iloc[0,3] = df_operaciones.iloc[0,2]
+    for i in range(1, len(df_operaciones)):
+        df_operaciones.iloc[i,3] = df_operaciones.iloc[i,2] + df_operaciones.iloc[i-1,3]
+        df_operaciones.iloc[i,4] = df_operaciones.iloc[i,1] + df_operaciones.iloc[i-1,4]
+    return df_operaciones
+
+def portfolio_value_active(rebalance_date_values, first_month_weightprice_active, passive_investment_historical_prices, df_operaciones):
+    first_month_weightprice_active = first_month_weightprice_active[["Peso (%)", "Títulos P."]]
+    df_operaciones = df_operaciones.T
+    print(df_operaciones)
+    rebalances = {}
+    titulos_acum = {}
+    for date in rebalance_date_values:
+        rebalances[date] = first_month_weightprice_active
+        rebalances[date]["Precios"] = passive_investment_historical_prices[date]
+        rebalances[date].loc["AMXL.MX"]["Títulos P."] = 0
+        #titulos_acum[date] = df_operaciones[date][["titulos_t",""]]
+    print(rebalances)
