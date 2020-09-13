@@ -13,6 +13,8 @@ import numpy as np
 import yfinance as yf
 from functions import *
 pd.set_option('display.max_rows', None)
+import warnings
+warnings.filterwarnings('ignore')
 path = '/Users/israelcastillo/Documents/m_st/myst_if708348_lab1/files/NAFTRAC_holdings'
 
 def read_csv_files():
@@ -137,60 +139,90 @@ def signal_dates(first_month_weightprice_active, rebalance_date_values):
     #signal_dates = signal_dates[["Open", "Close"]]
     #signal_dates = signal_dates.drop(["Open"], axis=1)
     #signal_dates.to_pickle(("/Users/israelcastillo/Documents/m_st/myst_if708348_lab1/files/"+"SignalDates"+".pkl"))
-    cash_available = 109642.86
-    signal_dates = pd.read_pickle(("/Users/israelcastillo/Documents/m_st/myst_if708348_lab1/files/"+"SignalDates"+".pkl"))
+    cash_available = 109302.86
+    signal_dates = pd.read_pickle(("/Users/israelcastillo/Documents/m_st/myst_if708348_lab1/files/"+"SignalDates"+".pkl")).round(2)
     signal_dates["Buy?"] = "Nothing"
-    signal_dates["Buy at"] = 0
+    signal_dates["precio"] = 0
     signal_dates["Cash"] = cash_available
+    signal_dates["Diff"] = 0
     signal_dates["Inversion"] = 0
     signal_dates["Titulos"] = 0
-    signal_dates["Com"] = 0
+    signal_dates["comision"] = 0
     signal_dates["I - C"] = 0
-    signal_dates["T P."] = 0
-    for i in range(2, len(signal_dates)):
-        signal_dates.iloc[0,1] = "Buy"
-        signal_dates.iloc[0,3] = cash_available
-        signal_dates.iloc[0,4] = cash_available*.10
-        signal_dates.iloc[0,5] = 3811.0
-        signal_dates.iloc[0,8] = 3811.0
-        signal_dates.iloc[0,6] = signal_dates.iloc[0,5] * signal_dates.iloc[0,0] * 0.00125
-        signal_dates.iloc[1,3] = cash_available-cash_available*.10
-        signal_dates.iloc[i,3] = signal_dates.iloc[i-1,3]
-        diff = np.log(signal_dates.iloc[i,0]/signal_dates.iloc[i-2,0])
+    signal_dates["titulos_c"] = 0
+    signal_dates["titulos_t"] = 0
+    signal_dates["c_acum"] = 0
+    for i in range(1, len(signal_dates)):
+        signal_dates.iloc[0,2] = "Buy"
+        signal_dates.iloc[0,3] = signal_dates.iloc[0,1]
+        signal_dates.iloc[0,7] = 3811
+        signal_dates.iloc[0,8] = signal_dates.iloc[0,7] * signal_dates.iloc[0,3] * .00125
+        signal_dates.iloc[i,4] = signal_dates.iloc[i-1,4]
+        signal_dates.iloc[0,10] = signal_dates.iloc[0,7]
+        signal_dates.iloc[0,11] = signal_dates.iloc[0,7]
+        signal_dates.iloc[0,12] = signal_dates.iloc[0,8]
+
+        diff = (signal_dates.iloc[i-1,1]/signal_dates.iloc[i-1,0]-1)
         if diff < -.01:
-            signal_dates.iloc[i,1] = "Buy"
-            signal_dates.iloc[i,2] = signal_dates.iloc[i-1,0]
-            signal_dates.iloc[i,4] = signal_dates.iloc[i-1,3] * .10
-            signal_dates.iloc[i,3] = signal_dates.iloc[i-1,3] - signal_dates.iloc[i,4]
-            signal_dates.iloc[i,5] = signal_dates.iloc[i,4]/signal_dates.iloc[i,2]
-            signal_dates.iloc[i,6] = (signal_dates.iloc[i,5] * signal_dates.iloc[i,2] * 0.00125)
-            signal_dates.iloc[i,7] = signal_dates.iloc[i,4] - signal_dates.iloc[i,6]
-            signal_dates.iloc[i,8] = (signal_dates.iloc[i,7]/signal_dates.iloc[i,2]).round()
+            signal_dates.iloc[i,2] = "Buy"
+            signal_dates.iloc[i,3] = signal_dates.iloc[i,0]
+            signal_dates.iloc[i-1,5] = diff
+            signal_dates.iloc[i,6] = signal_dates.iloc[i,4]*.10
+            signal_dates.iloc[i,4] = signal_dates.iloc[i,4] - signal_dates.iloc[i,6]
+            signal_dates.iloc[i,7] = signal_dates.iloc[i,6] / signal_dates.iloc[i,3]
+            signal_dates.iloc[i,8] = (signal_dates.iloc[i,7] * signal_dates.iloc[i,3] * 0.00125)
+            signal_dates.iloc[i,9] = signal_dates.iloc[i,6] - signal_dates.iloc[i,8]
+            signal_dates.iloc[i,10] = signal_dates.iloc[i,9] / signal_dates.iloc[i,3]
+        signal_dates.iloc[i,11] = signal_dates.iloc[i-1,11] + signal_dates.iloc[i,10]
+        signal_dates.iloc[i,12] = signal_dates.iloc[i-1,12] + signal_dates.iloc[i,8]
+    return signal_dates
+
+def signal_dates_redux(data):
+    data = data[["titulos_t", "titulos_c", "precio", "comision", "c_acum", "Cash"]]
+    data["comision"] = data["comision"].round(2)
+    data["c_acum"] = data["c_acum"].round(2)
+    data["titulos_c"] = data["titulos_c"].apply(np.floor)
+    data["titulos_t"] = data["titulos_t"].apply(np.floor)
+    return data
+
+def df_operaciones(data):
+    data = signal_dates_redux(data)
     df_operaciones = pd.DataFrame()
-    for i in range(0, len(signal_dates)):
-        #signal_dates.iloc[i, 8] > 0
-        #if signal_dates.iloc[i, 1] == "Buy":
-        df_operaciones = df_operaciones.append(signal_dates.iloc[i, [2,3,6,8]])
-    df_operaciones["Com"] = df_operaciones["Com"].round(2)
-    df_operaciones = df_operaciones.rename(columns = {"Buy at":"price", "Com":"comision", "T P.":"titulos_c"})
-    df_operaciones["titulos_t"] = 0
-    df_operaciones["com_acum"] = 0
-    df_operaciones.iloc[0,4] = df_operaciones.iloc[0,1]
-    df_operaciones.iloc[0,3] = df_operaciones.iloc[0,2]
-    for i in range(1, len(df_operaciones)):
-        df_operaciones.iloc[i,3] = df_operaciones.iloc[i,2] + df_operaciones.iloc[i-1,3]
-        df_operaciones.iloc[i,4] = df_operaciones.iloc[i,1] + df_operaciones.iloc[i-1,4]
+    for i in range(0, len(data)):
+        if data.iloc[i, 2] != 0:
+            df_operaciones = df_operaciones.append(data.iloc[i, :])
     return df_operaciones
 
-def portfolio_value_active(rebalance_date_values, first_month_weightprice_active, passive_investment_historical_prices, df_operaciones):
+def portfolio_value_active(rebalance_date_values, first_month_weightprice_active,
+passive_investment_historical_prices, signal_dates):
+    signal_dates=signal_dates_redux(signal_dates)
     first_month_weightprice_active = first_month_weightprice_active[["Peso (%)", "Títulos P."]]
-    df_operaciones = df_operaciones.T
-    print(df_operaciones)
+    signal_dates = signal_dates.T
     rebalances = {}
     titulos_acum = {}
+    condensed_df = pd.DataFrame(columns=["capital", "return", "rend_acum"])
     for date in rebalance_date_values:
         rebalances[date] = first_month_weightprice_active
         rebalances[date]["Precios"] = passive_investment_historical_prices[date]
-        rebalances[date].loc["AMXL.MX"]["Títulos P."] = 0
-        #titulos_acum[date] = df_operaciones[date][["titulos_t",""]]
-    print(rebalances)
+        titulos_acum[date] = signal_dates[date][['titulos_t', 'c_acum', 'Cash']]
+        rebalances[date].iloc[4,1] = titulos_acum[date].loc['titulos_t']
+        rebalances[date].iloc[24,1] = titulos_acum[date].loc['Cash']
+        rebalances[date].iloc[24,0] = titulos_acum[date].loc['Cash']/1000000
+        rebalances[date].iloc[4,0] = rebalances[date].iloc[4,0] + 1 - rebalances[date].sum().loc['Peso (%)']
+        rebalances[date]["Postura"] = rebalances[date]['Títulos P.'] * rebalances[date]['Precios']
+        value = rebalances[date].sum()["Postura"].round(2)
+        condensed_df.loc[date] = value
+    insert_line = pd.DataFrame({'capital' : 1000000}, index = ['2018-01-30'])
+    condensed_df = pd.concat([insert_line, condensed_df])
+    for i in range(0, len(condensed_df)):
+        condensed_df.iloc[i,1] = ((condensed_df.iloc[i,0]/condensed_df.iloc[i-1,0])-1).round(4)
+        condensed_df.iloc[i,2] = ((condensed_df.iloc[i,0]/condensed_df.iloc[0,0])-1).round(4)
+        condensed_df.iloc[0,1] = 0
+    return condensed_df.reset_index()
+
+def market_benchmarks(df_pasiva, df_activa):
+    df_medidas = pd.DataFrame(index=['rend_m', 'rend_c', 'sharpe'],
+                            columns=['inv_activa', 'inv_pasiva'])
+    df_medidas['rend_m']['inv_activa'] = np.mean(df_activa)
+    df_medidas['rend_m']['inv_pasiva'] = np.mean(df_pasiva)
+    return df_medidas

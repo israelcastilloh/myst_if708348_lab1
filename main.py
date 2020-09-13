@@ -31,5 +31,10 @@ df_pasiva = portfolio_value(rebalance_date_values, first_month_weightprice, pass
 
 ###### ACTIVE INVESTMENT ######
 first_month_weightprice_active = active_initializer(first_month_weightprice)
-df_operaciones = signal_dates(first_month_weightprice_active, rebalance_date_values)
-df_activa = portfolio_value_active(rebalance_date_values, first_month_weightprice_active, passive_investment_historical_prices, df_operaciones)
+signal_dates = signal_dates(first_month_weightprice_active, rebalance_date_values)
+df_operaciones = df_operaciones(signal_dates)
+df_activa = portfolio_value_active(rebalance_date_values, first_month_weightprice_active, passive_investment_historical_prices, signal_dates)
+
+###### MARKET BENCHMARKS  ######
+df_medidas = market_benchmarks(df_pasiva, df_activa)
+print(df_medidas)
