@@ -27,7 +27,7 @@ first_tickers = get_first_tickers(normalized_data_dict)
 # data_yf = yf_downloader(first_tickers, '2018-01-31', '2020-08-24')
 passive_investment_historical_prices  = data_passive_investment(first_tickers, rebalance_date_values)
 first_month_weightprice = first_month_weightprice_calc(normalized_data_dict, passive_investment_historical_prices)
-df_pasiva = portfolio_value(rebalance_date_values, first_month_weightprice, passive_investment_historical_prices)
+df_pasiva = portfolio_value_pas(rebalance_date_values, first_month_weightprice, passive_investment_historical_prices)
 
 ###### ACTIVE INVESTMENT ######
 first_month_weightprice_active = active_initializer(first_month_weightprice)
@@ -37,4 +37,3 @@ df_activa = portfolio_value_active(rebalance_date_values, first_month_weightpric
 
 ###### MARKET BENCHMARKS  ######
 df_medidas = market_benchmarks(df_pasiva, df_activa)
-print(df_medidas)

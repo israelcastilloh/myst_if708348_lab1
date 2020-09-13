@@ -12,9 +12,10 @@ import pandas as pd
 import numpy as np
 import yfinance as yf
 from functions import *
-pd.set_option('display.max_rows', None)
 import warnings
+# pd.set_option('display.max_rows', None)
 warnings.filterwarnings('ignore')
+
 path = '/Users/israelcastillo/Documents/m_st/myst_if708348_lab1/files/NAFTRAC_holdings'
 
 def read_csv_files():
@@ -101,7 +102,7 @@ def first_month_weightprice_calc(normalized_data_dict, passive_investment_histor
     first_month_weightprice['Postura.'] = (first_month_weightprice['Títulos P.']*first_month_weightprice.iloc[:,1])
     return first_month_weightprice
 
-def portfolio_value(rebalance_date_values, first_month_weightprice, passive_investment_historical_prices):
+def portfolio_value_pas(rebalance_date_values, first_month_weightprice, passive_investment_historical_prices):
     portfolio_value=pd.DataFrame()
     for i in range(1, len(rebalance_date_values)+1):
         titles_per_ticker = first_month_weightprice['Títulos P.'] * passive_investment_historical_prices.iloc[:,i-1]
@@ -113,8 +114,10 @@ def portfolio_value(rebalance_date_values, first_month_weightprice, passive_inve
     portfolio_value["return"] = 0
     portfolio_value["rend_acum"] = 0
     for i in range(1, len(rebalance_date_values)+1):
-        portfolio_value.iloc[i,2] = np.log(portfolio_value["capital"][i]/portfolio_value["capital"][i-1]).round(4)
-        portfolio_value.iloc[i,3] = (np.log(portfolio_value["capital"][i]/portfolio_value["capital"][0])).round(4)
+        portfolio_value.iloc[0,1] = 1000000
+        portfolio_value.iloc[i,2] = (portfolio_value["capital"][i]/portfolio_value["capital"][i-1]-1).round(4)
+        portfolio_value.iloc[0,3] = 0
+        portfolio_value.iloc[i,3] = portfolio_value.iloc[i,2] + portfolio_value.iloc[i-1,3]
     return portfolio_value
 
 def active_initializer(data):
@@ -139,7 +142,7 @@ def signal_dates(first_month_weightprice_active, rebalance_date_values):
     #signal_dates = signal_dates[["Open", "Close"]]
     #signal_dates = signal_dates.drop(["Open"], axis=1)
     #signal_dates.to_pickle(("/Users/israelcastillo/Documents/m_st/myst_if708348_lab1/files/"+"SignalDates"+".pkl"))
-    cash_available = 109302.86
+    cash_available = 109402.86
     signal_dates = pd.read_pickle(("/Users/israelcastillo/Documents/m_st/myst_if708348_lab1/files/"+"SignalDates"+".pkl")).round(2)
     signal_dates["Buy?"] = "Nothing"
     signal_dates["precio"] = 0
@@ -214,15 +217,24 @@ passive_investment_historical_prices, signal_dates):
         condensed_df.loc[date] = value
     insert_line = pd.DataFrame({'capital' : 1000000}, index = ['2018-01-30'])
     condensed_df = pd.concat([insert_line, condensed_df])
+    condensed_df['rend_acum'] = 0
     for i in range(0, len(condensed_df)):
         condensed_df.iloc[i,1] = ((condensed_df.iloc[i,0]/condensed_df.iloc[i-1,0])-1).round(4)
-        condensed_df.iloc[i,2] = ((condensed_df.iloc[i,0]/condensed_df.iloc[0,0])-1).round(4)
         condensed_df.iloc[0,1] = 0
+        condensed_df.iloc[i,2] = condensed_df.iloc[i,1] + condensed_df.iloc[i-1,2]
     return condensed_df.reset_index()
 
 def market_benchmarks(df_pasiva, df_activa):
+    rf = 0.0770
     df_medidas = pd.DataFrame(index=['rend_m', 'rend_c', 'sharpe'],
-                            columns=['inv_activa', 'inv_pasiva'])
-    df_medidas['rend_m']['inv_activa'] = np.mean(df_activa)
-    df_medidas['rend_m']['inv_pasiva'] = np.mean(df_pasiva)
+                            columns=['descripcion', 'inv_activa', 'inv_pasiva'])
+    df_medidas.loc['rend_m']['inv_activa'] = round(np.mean(df_activa['return']),4)
+    df_medidas.loc['rend_m']['inv_pasiva'] = round(np.mean(df_pasiva['return']),4)
+    df_medidas.loc['rend_c']['inv_activa'] = df_activa.iloc[-1,3]
+    df_medidas.loc['rend_c']['inv_pasiva'] = df_pasiva.iloc[-1,3]
+    df_medidas.loc['sharpe']['inv_activa'] = round((df_medidas.loc['rend_m']['inv_activa'] - rf/12)/ np.std(df_activa['return']),4)
+    df_medidas.loc['sharpe']['inv_pasiva'] = round((df_medidas.loc['rend_m']['inv_pasiva'] - rf/12)/np.std(df_pasiva['return']),4)
+    df_medidas.loc['rend_m']['descripcion'] = "Rendimiento Promedio Mensual"
+    df_medidas.loc['rend_c']['descripcion'] = "Rendimiento Mensual Acumulado"
+    df_medidas.loc['sharpe']['descripcion'] = "Sharpe Ratio"
     return df_medidas
