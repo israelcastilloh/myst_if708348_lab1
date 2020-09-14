@@ -15,8 +15,14 @@ from functions import *
 import warnings
 #pd.set_option('display.max_rows', None)
 warnings.filterwarnings('ignore')
+from pathlib import Path
+import os
 
-path = '/Users/israelcastillo/Documents/m_st/myst_if708348_lab1/files/NAFTRAC_holdings'
+
+path = "/files/NAFTRAC_holdings"
+start = "/"
+relative_path = os.path.relpath(path, start)
+path = relative_path
 
 def read_csv_files():
     files = file_walker(path)
