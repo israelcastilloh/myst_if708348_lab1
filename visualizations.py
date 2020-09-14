@@ -308,9 +308,11 @@ app.layout = html.Div(children=[
             print(first_tickers)
             for tickers in first_tickers:
                 print(tickers)
-                yf_data[tickers] = yf.download(tickers, start=first_date, end=last_date, actions=False, interval = "1d",auto_adjust = False, prepost = False)
+                yf_data[tickers] = yf.download(tickers, start=first_date, end=last_date, actions=False,
+                interval = "1d",auto_adjust = False, prepost = False)
                 route = str(tickers)
-                yf_data[tickers].to_pickle(("/Users/israelcastillo/Documents/m_st/myst_if708348_lab1/files/"+route+".pkl"))
+                yf_data[tickers].to_pickle(
+                ("/Users/israelcastillo/Documents/m_st/myst_if708348_lab1/files/"+route+".pkl"))
 
         def data_passive_investment(ticker_to_yf, rebalance_date_values):
             data_yf={}
@@ -318,9 +320,10 @@ app.layout = html.Div(children=[
             condensed_df = []
             for ticker in ticker_to_yf:
                 route = str(ticker)
-                #data_yf[ticker]=  yf.download(ticker, start='2018-01-31', end='2020-08-24', actions=False, \
+                #data_yf[ticker]=  yf.download(ticker, start='2018-01-31', end='2020-08-24', actions=False,
                 interval = "1d", auto_adjust = False, prepost = False)
-                data_yf[ticker] = pd.read_pickle(("/Users/israelcastillo/Documents/m_st/myst_if708348_lab1/files/"+route+".pkl"))
+                data_yf[ticker] =
+                pd.read_pickle(("/Users/israelcastillo/Documents/m_st/myst_if708348_lab1/files/"+route+".pkl"))
                 data_yf[ticker] = data_yf[ticker][["Close"]].reset_index()
                 data_yf[ticker] = data_yf[ticker][::-1].set_index("Date").rename(columns={"Close": ticker})
                 rebalance_dates_prices[ticker] = pd.DataFrame()
@@ -377,21 +380,29 @@ app.layout = html.Div(children=[
         dcc.Markdown('''
         ```py
         def first_month_weightprice_calc(normalized_data_dict, passive_investment_historical_prices):
-            first_month_weightprice = list(normalized_data_dict.values())[0][['Ticker', 'Peso (%)']].groupby('Ticker')['Peso (%)'].sum().sort_index()
-            first_month_weightprice = pd.concat([first_month_weightprice, pd.DataFrame(passive_investment_historical_prices['2018-01-31'])], axis=1)
+            first_month_weightprice = list(normalized_data_dict.values())[0][['Ticker', 'Peso (%)']].
+                groupby('Ticker')['Peso (%)'].sum().sort_index()
+            first_month_weightprice = pd.concat([first_month_weightprice,
+                pd.DataFrame(passive_investment_historical_prices['2018-01-31'])], axis=1)
             first_month_weightprice.iloc[:,1] = first_month_weightprice.iloc[:,1]
             first_month_weightprice['Peso (%)'] = first_month_weightprice['Peso (%)'].astype(float)
             first_month_weightprice.loc['MXN CASH']['Peso (%)'] = 0.0431001
             first_month_weightprice['Capital Ponderado'] = 0
             for i in range(len(first_month_weightprice['Capital Ponderado'])):
                 first_month_weightprice.iloc[i,2] = (first_month_weightprice.iloc[i,0]*float(1000000)).round(4)
-            #first_month_weightprice['Títulos'] = (first_month_weightprice['Capital Ponderado']/first_month_weightprice.iloc[:,1]).apply(np.floor)
-            first_month_weightprice['Comisión'] = ((first_month_weightprice['Capital Ponderado']/first_month_weightprice.iloc[:,1]).apply(np.floor)*first_month_weightprice.iloc[:,1] * 0.00125)
+            #first_month_weightprice['Títulos'] = (first_month_weightprice['Capital Ponderado']
+                /first_month_weightprice.iloc[:,1]).apply(np.floor)
+            first_month_weightprice['Comisión'] = ((first_month_weightprice['Capital Ponderado']
+                /first_month_weightprice.iloc[:,1]).apply(np.floor)*first_month_weightprice.iloc[:,1] * 0.00125)
             first_month_weightprice.loc['MXN CASH']['Comisión'] = 0
-            first_month_weightprice['Capital - Comision'] = (first_month_weightprice['Capital Ponderado'] - first_month_weightprice['Comisión'])
-            first_month_weightprice['Títulos P.'] = (first_month_weightprice['Capital - Comision']/first_month_weightprice.iloc[:,1]).apply(np.floor)
-            first_month_weightprice.loc['MXN CASH']['Títulos P.'] = first_month_weightprice.loc['MXN CASH']['Peso (%)']*1000000
-            first_month_weightprice['Postura.'] = (first_month_weightprice['Títulos P.']*first_month_weightprice.iloc[:,1])
+            first_month_weightprice['Capital - Comision'] = (first_month_weightprice['Capital Ponderado']
+                - first_month_weightprice['Comisión'])
+            first_month_weightprice['Títulos P.'] = (first_month_weightprice['Capital - Comision']
+                /first_month_weightprice.iloc[:,1]).apply(np.floor)
+            first_month_weightprice.loc['MXN CASH']['Títulos P.'] =
+                first_month_weightprice.loc['MXN CASH']['Peso (%)']*1000000
+            first_month_weightprice['Postura.'] =
+                (first_month_weightprice['Títulos P.']*first_month_weightprice.iloc[:,1])
             return first_month_weightprice
         '''
         ,className = "code-block")]),
@@ -544,7 +555,8 @@ app.layout = html.Div(children=[
     dbc.Row([
         dcc.Markdown('''
         ```py
-        df_pasiva = portfolio_value_pas(rebalance_date_values, first_month_weightprice, passive_investment_historical_prices)
+        df_pasiva = portfolio_value_pas(rebalance_date_values, first_month_weightprice,
+            passive_investment_historical_prices)
         '''
         ,className = "code-block")]),
 
@@ -555,7 +567,8 @@ app.layout = html.Div(children=[
     dbc.Row([
         dcc.Markdown('''
         ```py
-        df_activa = portfolio_value_active(rebalance_date_values, first_month_weightprice_active, passive_investment_historical_prices, signal_dates)
+        df_activa = portfolio_value_active(rebalance_date_values, first_month_weightprice_active,
+            passive_investment_historical_prices, signal_dates)
         '''
         ,className = "code-block")]),
 
@@ -602,8 +615,10 @@ app.layout = html.Div(children=[
             df_medidas.loc['rend_m']['inv_pasiva'] = round(np.mean(df_pasiva['return']),4)
             df_medidas.loc['rend_c']['inv_activa'] = df_activa.iloc[-1,3]
             df_medidas.loc['rend_c']['inv_pasiva'] = df_pasiva.iloc[-1,3]
-            df_medidas.loc['sharpe']['inv_activa'] = round((df_medidas.loc['rend_m']['inv_activa'] - rf/12)/ np.std(df_activa['return']),4)
-            df_medidas.loc['sharpe']['inv_pasiva'] = round((df_medidas.loc['rend_m']['inv_pasiva'] - rf/12)/np.std(df_pasiva['return']),4)
+            df_medidas.loc['sharpe']['inv_activa'] = round((df_medidas.loc['rend_m']['inv_activa']
+                - rf/12)/ np.std(df_activa['return']),4)
+            df_medidas.loc['sharpe']['inv_pasiva'] = round((df_medidas.loc['rend_m']['inv_pasiva']
+                - rf/12)/np.std(df_pasiva['return']),4)
             df_medidas.loc['rend_m']['descripcion'] = "Rendimiento Promedio Mensual"
             df_medidas.loc['rend_c']['descripcion'] = "Rendimiento Mensual Acumulado"
             df_medidas.loc['sharpe']['descripcion'] = "Sharpe Ratio"
@@ -690,15 +705,18 @@ app.layout = html.Div(children=[
         first_tickers = get_first_tickers(normalized_data_dict)
         # data_yf = yf_downloader(first_tickers, '2018-01-31', '2020-08-24')
         passive_investment_historical_prices  = data_passive_investment(first_tickers, rebalance_date_values)
-        first_month_weightprice = first_month_weightprice_calc(normalized_data_dict, passive_investment_historical_prices)
-        df_pasiva = portfolio_value_pas(rebalance_date_values, first_month_weightprice, passive_investment_historical_prices)
+        first_month_weightprice = first_month_weightprice_calc(normalized_data_dict,
+            passive_investment_historical_prices)
+        df_pasiva = portfolio_value_pas(rebalance_date_values, first_month_weightprice,
+            passive_investment_historical_prices)
 
         ###### ACTIVE INVESTMENT ######
         first_month_weightprice_active = active_initializer(first_month_weightprice)
         signal_dates = signal_dates(first_month_weightprice_active, rebalance_date_values)
         signal_dates_redux = signal_dates_redux(signal_dates)
         df_operaciones = df_operaciones(signal_dates)
-        df_activa = portfolio_value_active(rebalance_date_values, first_month_weightprice_active, passive_investment_historical_prices, signal_dates)
+        df_activa = portfolio_value_active(rebalance_date_values, first_month_weightprice_active,
+            passive_investment_historical_prices, signal_dates)
 
         ###### MARKET BENCHMARKS  ######
         df_medidas = market_benchmarks(df_pasiva, df_activa)

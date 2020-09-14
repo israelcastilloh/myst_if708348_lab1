@@ -55,9 +55,10 @@
   display: inline-block;
   padding-top: 1%;
   padding-bottom: 1%;
-  text-align: justify;
   padding-left: 15%;
   padding-right: 8%;
+  text-align: justify;
+  margin-right: auto;
 }
 
 .image_sharpe {
