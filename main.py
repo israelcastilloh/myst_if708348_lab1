@@ -15,6 +15,7 @@ data_dict = read_csv_files()
 
 ###### DATA FROM CSV FIXED AND PATCHED ######
 normalized_data_dict = normalized_data(data_dict)
+compiled_norm = compiled_norm(normalized_data_dict)
 
 ###### ALL TICKERS ON THE PERIOD STUDIES WITHIN THE NAFTRACK ######
 global_tickers = get_global_tickers(normalized_data_dict)
@@ -32,6 +33,7 @@ df_pasiva = portfolio_value_pas(rebalance_date_values, first_month_weightprice, 
 ###### ACTIVE INVESTMENT ######
 first_month_weightprice_active = active_initializer(first_month_weightprice)
 signal_dates = signal_dates(first_month_weightprice_active, rebalance_date_values)
+signal_dates_redux = signal_dates_redux(signal_dates)
 df_operaciones = df_operaciones(signal_dates)
 df_activa = portfolio_value_active(rebalance_date_values, first_month_weightprice_active, passive_investment_historical_prices, signal_dates)
 

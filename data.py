@@ -29,13 +29,16 @@ def read_csv_files():
 
 def normalized_data(data_dict):
     for file in data_dict:
-        #data_dict[file] = data_dict[file].drop(columns="Nombre", axis=0)
         data_dict[file]["Ticker"] = clean_tickers(data_dict, file)
         data_dict[file]["Precio"] = data_dict[file]["Precio"].replace(',','', regex=True).astype(float)
         data_dict[file]["Peso (%)"] = (data_dict[file]["Peso (%)"].astype(float))/100
         data_dict[file] = data_dict[file].set_index("Ticker").sort_index()
         data_dict[file] = data_dict[file].reset_index()
     return data_dict
+
+def compiled_norm(data):
+    data = pd.concat(data, axis=1)
+    return data
 
 def get_global_tickers(normalized_data_dict):
     global_tickers = []
@@ -117,7 +120,7 @@ def portfolio_value_pas(rebalance_date_values, first_month_weightprice, passive_
         portfolio_value.iloc[0,1] = 1000000
         portfolio_value.iloc[i,2] = (portfolio_value["capital"][i]/portfolio_value["capital"][i-1]-1).round(4)
         portfolio_value.iloc[0,3] = 0
-        portfolio_value.iloc[i,3] = portfolio_value.iloc[i,2] + portfolio_value.iloc[i-1,3]
+        portfolio_value.iloc[i,3] = round(portfolio_value.iloc[i,2] + portfolio_value.iloc[i-1,3],4)
     return portfolio_value
 
 def active_initializer(data):
