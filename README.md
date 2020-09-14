@@ -1,9 +1,7 @@
-# Project Title: Lab 1
+# Project Title: Lab 1 - Inversión de Capital
 
 ## Porfavor utiliza el Jupyter Notebook para correr el servidor de Dash e instalar dependencias.
-
-## Description
-This is the Lab 1. Regarding NAFTRAC rebalancing. 
+## Deployment in: https://lab1-myst.herokuapp.com/
 
 ## Install dependencies
 
@@ -11,10 +9,11 @@ Install all the dependencies stated in the requirements.txt file, just run the f
 
         pip install -r requirements.txt
         
-Or you can manually install one by one using the name and version in the file.
-
 ## Author
 ### Israel Castillo Herrera IF708348
+
+## Description
+This is the Lab 1. Regarding NAFTRAC rebalancing. 
 
 ## License
 **GNU General Public License v3.0** 
