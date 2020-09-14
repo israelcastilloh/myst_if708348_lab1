@@ -28,7 +28,7 @@ go.Scatter(x=df_activa.reset_index()['index'], y=df_activa['rend_acum'], name="I
 go.Scatter(x=df_pasiva.reset_index()['timestamp'], y=df_pasiva['rend_acum'], name="Inv Pasiva %"),
 ])
 
-app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 server = app.server
 app.title = "Notebook Lab.1"
 app.layout = html.Div(children=[
