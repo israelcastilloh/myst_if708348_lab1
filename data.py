@@ -13,10 +13,10 @@ import numpy as np
 import yfinance as yf
 from functions import *
 import warnings
-# pd.set_option('display.max_rows', None)
+#pd.set_option('display.max_rows', None)
 warnings.filterwarnings('ignore')
 
-path = '../files/NAFTRAC_holdings'
+path = '/Users/israelcastillo/Documents/m_st/myst_if708348_lab1/files/NAFTRAC_holdings'
 
 def read_csv_files():
     files = file_walker(path)
@@ -65,7 +65,7 @@ def yf_downloader(first_tickers, first_date, last_date):
         print(tickers)
         yf_data[tickers] = yf.download(tickers, start=first_date, end=last_date, actions=False, interval = "1d", auto_adjust = False, prepost = False)
         route = str(tickers)
-        yf_data[tickers].to_pickle(("../files/"+route+".pkl"))
+        yf_data[tickers].to_pickle(("/Users/israelcastillo/Documents/m_st/myst_if708348_lab1/files/"+route+".pkl"))
 
 def data_passive_investment(ticker_to_yf, rebalance_date_values):
     data_yf={}
@@ -74,7 +74,7 @@ def data_passive_investment(ticker_to_yf, rebalance_date_values):
     for ticker in ticker_to_yf:
         route = str(ticker)
         #data_yf[ticker]=  yf.download(ticker, start='2018-01-31', end='2020-08-24', actions=False, interval = "1d", auto_adjust = False, prepost = False)
-        data_yf[ticker] = pd.read_pickle(("../files/"+route+".pkl"))
+        data_yf[ticker] = pd.read_pickle(("/Users/israelcastillo/Documents/m_st/myst_if708348_lab1/files/"+route+".pkl"))
         data_yf[ticker] = data_yf[ticker][["Close"]].reset_index()
         data_yf[ticker] = data_yf[ticker][::-1].set_index("Date").rename(columns={"Close": ticker})
         rebalance_dates_prices[ticker] = pd.DataFrame()
@@ -191,7 +191,7 @@ def signal_dates_redux(data):
     data["titulos_t"] = data["titulos_t"].apply(np.floor)
     return data
 
-def df_operaciones(data):
+def df_operaciones_f(data):
     data = signal_dates_redux(data)
     df_operaciones = pd.DataFrame()
     for i in range(0, len(data)):

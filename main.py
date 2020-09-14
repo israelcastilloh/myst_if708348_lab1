@@ -33,8 +33,8 @@ df_pasiva = portfolio_value_pas(rebalance_date_values, first_month_weightprice, 
 ###### ACTIVE INVESTMENT ######
 first_month_weightprice_active = active_initializer(first_month_weightprice)
 signal_dates = signal_dates(first_month_weightprice_active, rebalance_date_values)
-signal_dates_redux = signal_dates_redux(signal_dates)
-df_operaciones = df_operaciones(signal_dates)
+signal_dates_reduxes = signal_dates_redux(signal_dates)
+df_operaciones = df_operaciones_f(signal_dates)
 df_activa = portfolio_value_active(rebalance_date_values, first_month_weightprice_active, passive_investment_historical_prices, signal_dates)
 
 ###### MARKET BENCHMARKS  ######

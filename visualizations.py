@@ -502,7 +502,7 @@ app.layout = html.Div(children=[
         ,className = "code-block")]),
 
     dbc.Container(
-        dbc.Table.from_dataframe(signal_dates_redux.reset_index().round(), striped=True, bordered=True, hover=True),
+        dbc.Table.from_dataframe(signal_dates_reduxes.reset_index().round(), striped=True, bordered=True, hover=True),
         style={'height': '500px', 'overflowY': 'auto'}, className="table"),
 
     dbc.Row([
