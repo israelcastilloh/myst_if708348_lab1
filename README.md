@@ -1,5 +1,6 @@
 # Project Title: Lab 1
 
+## Porfavor utiliza el Jupyter Notebook para correr el servidor de Dash e instalar dependencias.
 
 ## Description
 This is the Lab 1. Regarding NAFTRAC rebalancing. 
@@ -12,10 +13,6 @@ Install all the dependencies stated in the requirements.txt file, just run the f
         
 Or you can manually install one by one using the name and version in the file.
 
-## Funcionalities
-
-*Add here examples of core functionalities for the project in this repository.*
-
 ## Author
 ### Israel Castillo Herrera IF708348
 
@@ -26,6 +23,3 @@ Or you can manually install one by one using the name and version in the file.
 complete source code of licensed works and modifications, which include larger 
 works using a licensed work, under the same license. Copyright and license notices 
 must be preserved. Contributors provide an express grant of patent rights.*
-
-## Contact
-*For more information in reggards of this repo, please contact name@email.com*
