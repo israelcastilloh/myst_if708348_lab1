@@ -18,6 +18,8 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import plotly.graph_objects as go
 
+bundle exec rake assets:precompile
+
 fig_active_pasive = go.Figure(data=[
 go.Scatter(x=df_activa.reset_index()['index'], y=df_activa['capital'], name="Inv Activa $"),
 go.Scatter(x=df_pasiva.reset_index()['timestamp'], y=df_pasiva['capital'], name="Inv Pasiva $"),
