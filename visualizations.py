@@ -183,7 +183,7 @@ app.layout = html.Div(children=[
         className = "small-text")]),
 
     dbc.Container(
-        dbc.Table.from_dataframe(compiled_norm.round(2), striped=True, bordered=True, hover=True),
+        dbc.Table.from_dataframe(compiled_normex.round(2), striped=True, bordered=True, hover=True),
         style={'height': '500px', 'overflowY': 'auto'}, className="table"),
 
     dbc.Row([

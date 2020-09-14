@@ -14,7 +14,7 @@ import yfinance as yf
 from functions import *
 import warnings
 # pd.set_option('display.max_rows', None)
-warnings.filterwarnings('ignore')
+#warnings.filterwarnings('ignore')
 
 path = '/Users/israelcastillo/Documents/m_st/myst_if708348_lab1/files/NAFTRAC_holdings'
 

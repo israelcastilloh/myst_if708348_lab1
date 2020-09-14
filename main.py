@@ -15,7 +15,7 @@ data_dict = read_csv_files()
 
 ###### DATA FROM CSV FIXED AND PATCHED ######
 normalized_data_dict = normalized_data(data_dict)
-compiled_norm = compiled_norm(normalized_data_dict)
+compiled_normex = compiled_norm(normalized_data_dict)
 
 ###### ALL TICKERS ON THE PERIOD STUDIES WITHIN THE NAFTRACK ######
 global_tickers = get_global_tickers(normalized_data_dict)
