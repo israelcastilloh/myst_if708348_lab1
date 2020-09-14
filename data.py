@@ -36,9 +36,9 @@ def normalized_data(data_dict):
         data_dict[file] = data_dict[file].reset_index()
     return data_dict
 
-# def compiled_norm(data):
-#     data = pd.concat(data, axis=1)
-#     return data
+def compiled_norm(data):
+    data = pd.concat(data, axis=1)
+    return data
 
 def get_global_tickers(normalized_data_dict):
     global_tickers = []
