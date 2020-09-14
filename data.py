@@ -15,8 +15,19 @@ from functions import *
 import warnings
 #pd.set_option('display.max_rows', None)
 warnings.filterwarnings('ignore')
+from pathlib import Path
+import os
 
-path = '/Users/israelcastillo/Documents/m_st/myst_if708348_lab1/files/NAFTRAC_holdings'
+
+path = "/files/NAFTRAC_holdings"
+start = "/"
+relative_path = os.path.relpath(path, start)
+path = relative_path
+
+path2 = "/files"
+start2 = "/"
+relative_path2 = os.path.relpath(path2, start2)
+path2 = relative_path2+"/"
 
 def read_csv_files():
     files = file_walker(path)
@@ -65,7 +76,7 @@ def yf_downloader(first_tickers, first_date, last_date):
         print(tickers)
         yf_data[tickers] = yf.download(tickers, start=first_date, end=last_date, actions=False, interval = "1d", auto_adjust = False, prepost = False)
         route = str(tickers)
-        yf_data[tickers].to_pickle(("/Users/israelcastillo/Documents/m_st/myst_if708348_lab1/files/"+route+".pkl"))
+        yf_data[tickers].to_pickle((path2+route+".pkl"))
 
 def data_passive_investment(ticker_to_yf, rebalance_date_values):
     data_yf={}
@@ -74,7 +85,7 @@ def data_passive_investment(ticker_to_yf, rebalance_date_values):
     for ticker in ticker_to_yf:
         route = str(ticker)
         #data_yf[ticker]=  yf.download(ticker, start='2018-01-31', end='2020-08-24', actions=False, interval = "1d", auto_adjust = False, prepost = False)
-        data_yf[ticker] = pd.read_pickle(("/Users/israelcastillo/Documents/m_st/myst_if708348_lab1/files/"+route+".pkl"))
+        data_yf[ticker] = pd.read_pickle((path2+route+".pkl"))
         data_yf[ticker] = data_yf[ticker][["Close"]].reset_index()
         data_yf[ticker] = data_yf[ticker][::-1].set_index("Date").rename(columns={"Close": ticker})
         rebalance_dates_prices[ticker] = pd.DataFrame()
@@ -144,9 +155,9 @@ def signal_dates(first_month_weightprice_active, rebalance_date_values):
     #interval = "1d", auto_adjust = False, prepost = False)
     #signal_dates = signal_dates[["Open", "Close"]]
     #signal_dates = signal_dates.drop(["Open"], axis=1)
-    #signal_dates.to_pickle(("/Users/israelcastillo/Documents/m_st/myst_if708348_lab1/files/"+"SignalDates"+".pkl"))
+    #signal_dates.to_pickle((path2+"SignalDates"+".pkl"))
     cash_available = 109402.86
-    signal_dates = pd.read_pickle(("/Users/israelcastillo/Documents/m_st/myst_if708348_lab1/files/"+"SignalDates"+".pkl")).round(2)
+    signal_dates = pd.read_pickle((path2+"SignalDates"+".pkl")).round(2)
     signal_dates["Buy?"] = "Nothing"
     signal_dates["precio"] = 0
     signal_dates["Cash"] = cash_available
