@@ -8,6 +8,7 @@
 # -- repository: YOUR REPOSITORY URL                                                                     -- #
 # -- --------------------------------------------------------------------------------------------------- -- #
 """
+
 from main import *
 from data import *
 import dash_bootstrap_components as dbc
